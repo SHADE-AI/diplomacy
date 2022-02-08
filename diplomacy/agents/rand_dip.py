@@ -60,7 +60,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='RAND-DIP: Random Diplomacy Agent')
     parser.add_argument('--gameid', '-g', type=str, help='game id of game created in DATC diplomacy game')
     parser.add_argument('--powers', '-p', type=str, help='comma-seperated country names (AUSTRIA, ENGLAND, FRANCE, GERMANY, ITALY, RUSSIA, TURKEY)')
-    parser.add_argument('--hostname', '-h', type=str, default='localhost', help='host IP address (defaults to localhost)')
+    parser.add_argument('--hostname', '-H', type=str, default='localhost', help='host IP address (defaults to localhost)')
 
     args = parser.parse_args()
     return args
