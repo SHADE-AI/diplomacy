@@ -48,9 +48,9 @@ async def play(game_id, power_name, hostname='localhost', port=8432):
     # To download a copy of the game with messages from all powers, you need to export the game as an admin
     # by logging in as 'admin' / 'password'
 
-async def launch(game_id, powers=None):
+async def launch(game_id, hostname, powers=None):
     """ Creates and plays a network game """
-    await create_game(game_id)
+    await create_game(game_id, hostname)
     if powers is None:
         await asyncio.gather(*[play(game_id, power_name) for power_name in POWERS])
     else:
@@ -60,6 +60,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='RAND-DIP: Random Diplomacy Agent')
     parser.add_argument('--gameid', '-g', type=str, help='game id of game created in DATC diplomacy game')
     parser.add_argument('--powers', '-p', type=str, help='comma-seperated country names (AUSTRIA, ENGLAND, FRANCE, GERMANY, ITALY, RUSSIA, TURKEY)')
+    parser.add_argument('--hostname', '-h', type=str, default='localhost', help='host IP address (defaults to localhost)')
 
     args = parser.parse_args()
     return args
@@ -67,5 +68,5 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     # asyncio.run(launch(game_id='admin_1643762757865'))
-    asyncio.run(launch(args.gameid, args.powers))
+    asyncio.run(launch(args.gameid, args.hostname, args.powers))
 
