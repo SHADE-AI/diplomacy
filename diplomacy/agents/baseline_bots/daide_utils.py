@@ -8,7 +8,9 @@ __email__ = "sanderschulhoff@gmail.com"
 
 from lib2to3.pgen2.parse import ParseError
 from typing import List
+
 from diplomacy import Game
+from diplomacy_research.models.state_space import get_order_tokens
 import re
 
 def AND(arrangements: List[str]) -> str:
@@ -93,16 +95,22 @@ def parse_alliance_proposal(msg: str, recipient: str) -> List[str]:
 
         
 
-def is_order_aggressive(order: str) -> bool:
+def is_order_aggressive(order: str, sender: str, game: Game) -> bool:
     """
     Checks if this is an agressive order
     :param order: A string order, e.g. "A BUD S F TRI"
+    NOTE: Adapted directly from Joy's code
     """
-    # empty string
-    if not order:
-        return True
-
-    return order[0] == 'A'
+    order_token = get_order_tokens(order)
+    if order_token[0] =='A' or order_token[0] =='F':
+        #get location - add order_token[0] ('A' or 'F') at front to check if it collides with other powers' units
+        order_unit = order_token[0]+' '+order_token[2]
+        #check if loc has some units of other powers on
+        for power in game.powers:
+          if sender != power:
+            if order_unit in game.powers[power].units:
+              return True 
+    return False
 
 def get_non_aggressive_orders(orders: List[str]) -> List[str]:
     """
@@ -123,4 +131,5 @@ if __name__ == "__main__":
     # print(parse_orr_xdo(msg))
     # print(ALY(["p1", "p2"]))
     # print(ALY(["GERMANY", "RUSSIA"], game))
-    print(parse_alliance_proposal("ALY (GERMANY RUSSIA) VSS (FRANCE ENGLAND ITALY TURKEY AUSTRIA)", "RUSSIA"))
+    # print(parse_alliance_proposal("ALY (GERMANY RUSSIA) VSS (FRANCE ENGLAND ITALY TURKEY AUSTRIA)", "RUSSIA"))
+    is_order_aggressive("A CON BUL", "TURKEY", game)
