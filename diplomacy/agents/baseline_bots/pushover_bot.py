@@ -2,7 +2,7 @@ __author__ = "Sander Schulhoff"
 __email__ = "sanderschulhoff@gmail.com"
 
 from baseline_bot import BaselineBot
-from daide_utils import parse_orr_xdo
+from daide_utils import parse_orr_xdo, get_non_aggressive_orders
 
 class PushoverBot(BaselineBot):
     """
@@ -20,7 +20,7 @@ class PushoverBot(BaselineBot):
         last_message = messages[keys[0]]
         # parse may fail
         try:
-            orders = parse_orr_xdo(last_message.message)
+            orders = get_non_aggressive_orders(parse_orr_xdo(last_message.message))
         except:
             pass
 

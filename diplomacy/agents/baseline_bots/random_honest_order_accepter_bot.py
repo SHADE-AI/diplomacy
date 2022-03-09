@@ -4,7 +4,7 @@ __email__ = "sanderschulhoff@gmail.com"
 from diplomacy import Message
 from baseline_bot import BaselineBot
 import random
-from daide_utils import parse_orr_xdo, ORR, XDO, YES, is_order_aggressive
+from daide_utils import parse_orr_xdo, ORR, XDO, YES, get_non_aggressive_orders
 
 class RandomHonestAccepterBot(BaselineBot):
     """
@@ -32,7 +32,7 @@ class RandomHonestAccepterBot(BaselineBot):
                 pass
         
         # remove aggressive orders
-        orders = [order for order in proposed_orders if not is_order_aggressive(order)]
+        orders = get_non_aggressive_orders(proposed_orders)
         
         # keep ~3/4 of the remaining orders at random
         orders = [order for order in proposed_orders if random.random() > 0.25]
