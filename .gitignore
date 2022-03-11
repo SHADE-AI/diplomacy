@@ -129,3 +129,6 @@ data
 
 # Tensorboard
 events.out.*
+
+# npm
+diplomacy/web/package-lock.json
