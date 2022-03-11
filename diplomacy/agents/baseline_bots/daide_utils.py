@@ -101,15 +101,15 @@ def is_order_aggressive(order: str, sender: str, game: Game) -> bool:
     :param order: A string order, e.g. "A BUD S F TRI"
     NOTE: Adapted directly from Joy's code
     """
-    order_token = get_order_tokens(order)
-    if order_token[0] =='A' or order_token[0] =='F':
-        #get location - add order_token[0] ('A' or 'F') at front to check if it collides with other powers' units
-        order_unit = order_token[0]+' '+order_token[2]
-        #check if loc has some units of other powers on
-        for power in game.powers:
-          if sender != power:
-            if order_unit in game.powers[power].units:
-              return True 
+    # order_token = get_order_tokens(order)
+    # if order_token[0] =='A' or order_token[0] =='F':
+    #     #get location - add order_token[0] ('A' or 'F') at front to check if it collides with other powers' units
+    #     order_unit = order_token[0]+' '+order_token[2]
+    #     #check if loc has some units of other powers on
+    #     for power in game.powers:
+    #       if sender != power:
+    #         if order_unit in game.powers[power].units:
+    #           return True 
     return False
 
 def get_non_aggressive_orders(orders: List[str]) -> List[str]:
