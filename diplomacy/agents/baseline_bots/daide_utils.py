@@ -116,7 +116,8 @@ def get_non_aggressive_orders(orders: List[str]) -> List[str]:
     """
     :return: all non aggressive orders in orders
     """
-    return [order for order in orders if not is_order_aggressive(order)]
+    return orders
+    # return [order for order in orders if not is_order_aggressive(order)]
 
 # def parse_daide_message(msg):
 #     """where's ocaml when I need it"""
