@@ -13,6 +13,23 @@ from diplomacy import Game
 # from diplomacy_research.models.state_space import get_order_tokens
 import re
 
+def get_order_tokens(order):
+    """ Retrieves the order tokens used in an order
+        e.g. 'A PAR - MAR' would return ['A PAR', '-', 'MAR']
+        NOTE: Stolen from diplomacy_research
+    """
+    # We need to keep 'A', 'F', and '-' in a temporary buffer to concatenate them with the next word
+    # We replace 'R' orders with '-'
+    # Tokenization would be: 'A PAR S A MAR - BUR' --> 'A PAR', 'S', 'A MAR', '- BUR'
+    #                        'A PAR R MAR'         --> 'A PAR', '- MAR'
+    buffer, order_tokens = [], []
+    for word in order.replace(' R ', ' - ').split():
+        buffer += [word]
+        if word not in ['A', 'F', '-']:
+            order_tokens += [' '.join(buffer)]
+            buffer = []
+    return order_tokens
+
 def AND(arrangements: List[str]) -> str:
     """
     ANDs together an array of arrangements
@@ -93,31 +110,28 @@ def parse_alliance_proposal(msg: str, recipient: str) -> List[str]:
         raise ParseError("A minimum of 2 powers are needed for an alliance")
 
 
-        
-
 def is_order_aggressive(order: str, sender: str, game: Game) -> bool:
     """
     Checks if this is an agressive order
     :param order: A string order, e.g. "A BUD S F TRI"
     NOTE: Adapted directly from Joy's code
     """
-    # order_token = get_order_tokens(order)
-    # if order_token[0] =='A' or order_token[0] =='F':
-    #     #get location - add order_token[0] ('A' or 'F') at front to check if it collides with other powers' units
-    #     order_unit = order_token[0]+' '+order_token[2]
-    #     #check if loc has some units of other powers on
-    #     for power in game.powers:
-    #       if sender != power:
-    #         if order_unit in game.powers[power].units:
-    #           return True 
+    order_token = get_order_tokens(order)
+    if order_token[0] =='A' or order_token[0] =='F':
+        #get location - add order_token[0] ('A' or 'F') at front to check if it collides with other powers' units
+        order_unit = order_token[0]+' '+order_token[2]
+        #check if loc has some units of other powers on
+        for power in game.powers:
+          if sender != power:
+            if order_unit in game.powers[power].units:
+              return True 
     return False
 
-def get_non_aggressive_orders(orders: List[str]) -> List[str]:
+def get_non_aggressive_orders(orders: List[str], sender:str, game: Game) -> List[str]:
     """
     :return: all non aggressive orders in orders
     """
-    return orders
-    # return [order for order in orders if not is_order_aggressive(order)]
+    return [order for order in orders if not is_order_aggressive(order, sender, game)]
 
 # def parse_daide_message(msg):
 #     """where's ocaml when I need it"""
@@ -133,4 +147,4 @@ if __name__ == "__main__":
     # print(ALY(["p1", "p2"]))
     # print(ALY(["GERMANY", "RUSSIA"], game))
     # print(parse_alliance_proposal("ALY (GERMANY RUSSIA) VSS (FRANCE ENGLAND ITALY TURKEY AUSTRIA)", "RUSSIA"))
-    is_order_aggressive("A CON BUL", "TURKEY", game)
+    print(is_order_aggressive("A CON BUL", "TURKEY", game))

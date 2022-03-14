@@ -33,7 +33,7 @@ class LoyalBot(BaselineBot):
             # ensure message sender is an ally
             if last_message.sender in self.allies:
                 try:
-                    orders = get_non_aggressive_orders(parse_orr_xdo(last_message.message))
+                    orders = get_non_aggressive_orders(parse_orr_xdo(last_message.message), self.power_name, self.game)
                     # set the orders
                     game.set_orders(self.power_name, orders)
                 except ParseError:

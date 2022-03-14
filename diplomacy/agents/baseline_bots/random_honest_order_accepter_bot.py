@@ -32,7 +32,7 @@ class RandomHonestAccepterBot(BaselineBot):
                 pass
         
         # remove aggressive orders
-        orders = get_non_aggressive_orders(proposed_orders)
+        orders = get_non_aggressive_orders(proposed_orders, self.power_name, self.game)
         
         # keep ~3/4 of the remaining orders at random
         orders = [order for order in proposed_orders if random.random() > 0.25]

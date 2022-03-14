@@ -20,12 +20,12 @@ class PushoverBot(BaselineBot):
         last_message = messages[keys[0]]
         # parse may fail
         try:
-            orders = get_non_aggressive_orders(parse_orr_xdo(last_message.message))
+            orders = get_non_aggressive_orders(parse_orr_xdo(last_message.message), self.power_name, self.game)
+            # set the orders
+            game.set_orders(self.power_name, orders)
         except:
             pass
 
-        # set the orders
-        game.set_orders(self.power_name, orders)
 
 if __name__ == "__main__":
     from diplomacy import Game
