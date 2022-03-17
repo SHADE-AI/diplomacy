@@ -34,12 +34,20 @@ def AND(arrangements: List[str]) -> str:
     """
     ANDs together an array of arrangements
     """
+
+    if len(arrangements) < 2:
+        raise Exception("Need at least 2 items to AND")
+
     return "AND" + "".join([f" ({a})" for a in arrangements])
 
 def ORR(arrangements: List[str]) -> str:
     """
     ORRs together an array of arrangements
     """
+
+    if len(arrangements) < 2:
+        raise Exception("Need at least 2 items to ORR")
+
     return "ORR" + "".join([f" ({a})" for a in arrangements])
 
 def XDO(orders: List[str]) -> List[str]:
@@ -140,8 +148,9 @@ if __name__ == "__main__":
     from diplomacy import Game
     # game instance
     game = Game()
-    # print(AND(["GO HOME", "BAD MONKEY"]))
-    # print(XDO(["Move back", "Move"]))
+    print(AND(["GO HOME", "BAD MONKEY"]))
+    # print(AND(["GO HOME"]))
+    print(XDO(["Move back", "Move"]))
     # msg = ORR(XDO(["Move back", "Move"]))
     # print(parse_orr_xdo(msg))
     # print(ALY(["p1", "p2"]))
