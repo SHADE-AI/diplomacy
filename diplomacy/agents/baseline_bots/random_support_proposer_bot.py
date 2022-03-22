@@ -3,9 +3,9 @@ __email__ = "kartik.shenoyy@gmail.com"
 
 from collections import defaultdict
 from diplomacy import Message
-from baseline_bot import BaselineBot
+from diplomacy.agents.baseline_bots.baseline_bot import BaselineBot
 import random
-from daide_utils import get_order_tokens, ORR, XDO
+from diplomacy.agents.baseline_bots.daide_utils import get_order_tokens, ORR, XDO
 
 
 class RandomSupportProposerBot(BaselineBot):

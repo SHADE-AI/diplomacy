@@ -1,5 +1,13 @@
 import asyncio
 import random
+
+from diplomacy.agents.baseline_bots.loyal_bot import LoyalBot
+from diplomacy.agents.baseline_bots.pushover_bot import PushoverBot
+# from diplomacy.agents.baseline_bots.random_allier_proposer_bot import RandomAllierProposerBot
+from diplomacy.agents.baseline_bots.random_honest_bot import RandomHonestBot
+from diplomacy.agents.baseline_bots.random_honest_order_accepter_bot import RandomHonestAccepterBot
+from diplomacy.agents.baseline_bots.random_proposer_bot import RandomProposerBot
+from diplomacy.agents.baseline_bots.random_support_proposer_bot import RandomSupportProposerBot
 from diplomacy.client.connection import connect
 from diplomacy.utils import exceptions
 import argparse
@@ -15,7 +23,7 @@ async def create_game(game_id, hostname='localhost', port=8432):
     print(channel.list_games(game_id=game_id))
     await channel.join_game(game_id=game_id)
 
-async def play(game_id, power_name, hostname='localhost', port=8432):
+async def play(game_id, botname, power_name, hostname='localhost', port=8432):
     """ Play as the specified power """
     connection = await connect(hostname, port)
     channel = await connection.authenticate('user_' + power_name, 'password')
@@ -24,22 +32,39 @@ async def play(game_id, power_name, hostname='localhost', port=8432):
     while not (await channel.list_games(game_id=game_id)):
         await asyncio.sleep(1.)
     game = await channel.join_game(game_id=game_id, power_name=power_name)
+    bot = None
+    if botname == 'random_support_proposer':
+        bot = RandomSupportProposerBot(power_name, game)
+    elif botname == 'random_honest':
+        bot = RandomHonestBot(power_name, game)
+    elif botname == 'random_honest_order_acceptor':
+        bot = RandomHonestAccepterBot(power_name, game)
+    elif botname == 'random_proposer':
+        bot = RandomProposerBot(power_name, game)
+    elif botname == 'loyal':
+        bot = LoyalBot(power_name, game)
+    elif botname == 'pushover':
+        bot = PushoverBot(power_name, game)
+    # elif botname == 'random_allier_proposer':
+    #     bot = RandomAllierProposerBot(power_name, game)
 
-    # Playing game
+# Playing game
     while not game.is_game_done:
-        current_phase = game.get_current_phase()
+        if botname == 'random':
+            current_phase = game.get_current_phase()
 
-        # Submitting orders
-        if game.get_orderable_locations(power_name):
-            possible_orders = game.get_all_possible_orders()
-            orders = [random.choice(possible_orders[loc]) for loc in game.get_orderable_locations(power_name)
-                      if possible_orders[loc]]
-            print('[%s/%s] - Submitted: %s' % (power_name, game.get_current_phase(), orders))
-            await game.set_orders(power_name=power_name, orders=orders, wait=False)
+            # Submitting orders
+            if game.get_orderable_locations(power_name):
+                possible_orders = game.get_all_possible_orders()
+                orders = [random.choice(possible_orders[loc]) for loc in game.get_orderable_locations(power_name)
+                          if possible_orders[loc]]
+                print('[%s/%s] - Submitted: %s' % (power_name, game.get_current_phase(), orders))
+                await game.set_orders(power_name=power_name, orders=orders, wait=False)
 
-        # Messages can be sent with game.send_message
-        # await game.send_game_message(message=game.new_power_message('FRANCE', 'This is the message'))
-
+            # Messages can be sent with game.send_message
+            # await game.send_game_message(message=game.new_power_message('FRANCE', 'This is the message'))
+        else:
+            bot.act()
         # Waiting for game to be processed
         while current_phase == game.get_current_phase():
             await asyncio.sleep(0.1)
@@ -48,19 +73,21 @@ async def play(game_id, power_name, hostname='localhost', port=8432):
     # To download a copy of the game with messages from all powers, you need to export the game as an admin
     # by logging in as 'admin' / 'password'
 
-async def launch(game_id, hostname, powers=None):
+async def launch(game_id, hostname, botname, powers=None, ):
     """ Creates and plays a network game """
     await create_game(game_id, hostname)
     if powers is None:
-        await asyncio.gather(*[play(game_id, power_name) for power_name in POWERS])
+        await asyncio.gather(*[play(game_id, botname, power_name) for power_name in POWERS])
     else:
-        await asyncio.gather(*[play(game_id, power_name) for power_name in powers.split(",")])
+        await asyncio.gather(*[play(game_id, botname, power_name) for power_name in powers.split(",")])
 
 def parse_args():
     parser = argparse.ArgumentParser(description='RAND-DIP: Random Diplomacy Agent')
     parser.add_argument('--gameid', '-g', type=str, help='game id of game created in DATC diplomacy game')
     parser.add_argument('--powers', '-p', type=str, help='comma-seperated country names (AUSTRIA, ENGLAND, FRANCE, GERMANY, ITALY, RUSSIA, TURKEY)')
     parser.add_argument('--hostname', '-H', type=str, default='localhost', help='host IP address (defaults to localhost)')
+    parser.add_argument('--bots', '-B', type=str, default='random',
+                        help='botname for all powers')
 
     args = parser.parse_args()
     return args

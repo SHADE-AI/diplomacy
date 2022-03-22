@@ -2,8 +2,10 @@ __author__ = "Sander Schulhoff"
 __email__ = "sanderschulhoff@gmail.com"
 
 from diplomacy import Message
-from random_proposer_bot import RandomProposerBot
-from daide_utils import ALY, get_other_powers
+
+from diplomacy.agents.baseline_bots.daide_utils import ALY, get_other_powers
+from diplomacy.agents.baseline_bots.random_proposer_bot import RandomProposerBot
+
 
 class RandomAllierProposerBot(RandomProposerBot):
     """

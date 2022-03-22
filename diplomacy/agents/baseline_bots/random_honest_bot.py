@@ -2,7 +2,7 @@ __author__ = "Sander Schulhoff"
 __email__ = "sanderschulhoff@gmail.com"
 
 from diplomacy import Message
-from baseline_bot import BaselineBot
+from diplomacy.agents.baseline_bots.baseline_bot import BaselineBot
 import random
 
 class RandomHonestBot(BaselineBot):

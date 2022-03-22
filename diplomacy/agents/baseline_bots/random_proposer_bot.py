@@ -2,9 +2,9 @@ __author__ = "Sander Schulhoff"
 __email__ = "sanderschulhoff@gmail.com"
 
 from diplomacy import Message
-from baseline_bot import BaselineBot
+from diplomacy.agents.baseline_bots.baseline_bot import BaselineBot
 import random
-from daide_utils import ORR, XDO, get_other_powers
+from diplomacy.agents.baseline_bots.daide_utils import ORR, XDO, get_other_powers
 
 class RandomProposerBot(BaselineBot):
     """

@@ -2,9 +2,9 @@ __author__ = "Sander Schulhoff"
 __email__ = "sanderschulhoff@gmail.com"
 
 from diplomacy import Message
-from baseline_bot import BaselineBot
+from diplomacy.agents.baseline_bots.baseline_bot import BaselineBot
 import random
-from daide_utils import parse_orr_xdo, ORR, XDO, YES, get_non_aggressive_orders
+from diplomacy.agents.baseline_bots.daide_utils import parse_orr_xdo, ORR, XDO, YES, get_non_aggressive_orders
 
 class RandomHonestAccepterBot(BaselineBot):
     """
