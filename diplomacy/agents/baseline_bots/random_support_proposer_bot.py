@@ -69,7 +69,6 @@ class RandomSupportProposerBot(BaselineBot):
                          if self.possible_orders[loc]]
         # set the orders
         game.set_orders(self.power_name, random_orders)
-        pass
 
 
 if __name__ == "__main__":
