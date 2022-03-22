@@ -18,7 +18,7 @@ POWERS = ['AUSTRIA', 'ENGLAND', 'FRANCE', 'GERMANY', 'ITALY', 'RUSSIA', 'TURKEY'
 async def create_game(game_id, hostname='localhost', port=8432):
     """ Creates a game on the server """
     connection = await connect(hostname, port)
-    channel = await connection.authenticate('kshenoy', 'password')
+    channel = await connection.authenticate('random_user', 'password')
     # await channel.create_game(game_id=game_id, rules={'REAL_TIME', 'NO_DEADLINE', 'POWER_CHOICE'})
     print(channel.list_games(game_id=game_id))
     await channel.join_game(game_id=game_id)
@@ -75,11 +75,11 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
 
 async def launch(game_id, hostname, botname, powers=None, ):
     """ Creates and plays a network game """
-    await create_game(game_id, hostname)
+    # await create_game(game_id, hostname)
     if powers is None:
-        await asyncio.gather(*[play(game_id, botname, power_name) for power_name in POWERS])
+        await asyncio.gather(*[play(game_id, botname, power_name, hostname) for power_name in POWERS])
     else:
-        await asyncio.gather(*[play(game_id, botname, power_name) for power_name in powers.split(",")])
+        await asyncio.gather(*[play(game_id, botname, power_name, hostname) for power_name in powers.split(",")])
 
 def parse_args():
     parser = argparse.ArgumentParser(description='RAND-DIP: Random Diplomacy Agent')
