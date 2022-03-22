@@ -20,7 +20,7 @@ class RandomSupportProposerBot(BaselineBot):
         super().__init__(power_name, game)
 
     def act(self):
-        self.possible_orders = game.get_all_possible_orders()
+        self.possible_orders = self.game.get_all_possible_orders()
         provs = [loc.upper() for loc in self.game.get_orderable_locations(self.power_name)]
 
         n_provs = set()
@@ -53,23 +53,25 @@ class RandomSupportProposerBot(BaselineBot):
                 raise "Coding Error"
             final_messages[self.game._unit_owner(selected_order[0]).name].append(selected_order[1])
 
+        messages = []
         for recipient in final_messages:
             suggested_proposals = ORR(XDO(final_messages[recipient]))
-
-            # send the other power a message containing the orders
-            self.game.add_message(Message(
-                sender=self.power_name,
-                recipient=recipient,
-                # convert the random orders to a str
-                message=str(suggested_proposals),
-                phase=self.game.get_current_phase(),
-            ))
+            messages.append((self.power_name, recipient, str(suggested_proposals)))
+            # # send the other power a message containing the orders
+            # self.game.add_message(Message(
+            #     sender=self.power_name,
+            #     recipient=recipient,
+            #     # convert the random orders to a str
+            #     message=str(suggested_proposals),
+            #     phase=self.game.get_current_phase(),
+            # ))
         random_orders = [random.choice(self.possible_orders[loc]) for loc in
                          self.game.get_orderable_locations(self.power_name)
                          if self.possible_orders[loc]]
         # set the orders
-        game.set_orders(self.power_name, random_orders)
+        # self.game.set_orders(self.power_name, random_orders)
 
+        return messages, random_orders
 
 if __name__ == "__main__":
     from diplomacy import Game

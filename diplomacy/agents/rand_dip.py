@@ -10,6 +10,7 @@ from diplomacy.agents.baseline_bots.random_proposer_bot import RandomProposerBot
 from diplomacy.agents.baseline_bots.random_support_proposer_bot import RandomSupportProposerBot
 from diplomacy.client.connection import connect
 from diplomacy.utils import exceptions
+from diplomacy import Message
 import argparse
 
 POWERS = ['AUSTRIA', 'ENGLAND', 'FRANCE', 'GERMANY', 'ITALY', 'RUSSIA', 'TURKEY']
@@ -50,9 +51,8 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
 
 # Playing game
     while not game.is_game_done:
+        current_phase = game.get_current_phase()
         if botname == 'random':
-            current_phase = game.get_current_phase()
-
             # Submitting orders
             if game.get_orderable_locations(power_name):
                 possible_orders = game.get_all_possible_orders()
@@ -64,7 +64,15 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
             # Messages can be sent with game.send_message
             # await game.send_game_message(message=game.new_power_message('FRANCE', 'This is the message'))
         else:
-            bot.act()
+            messages, orders = bot.act()
+            for msg in messages:
+                game.add_message(Message(
+                    sender=msg[0],
+                    recipient=msg[1],
+                    # convert the random orders to a str
+                    message=msg[2],
+                    phase=game.get_current_phase(),
+                ))
         # Waiting for game to be processed
         while current_phase == game.get_current_phase():
             await asyncio.sleep(0.1)
