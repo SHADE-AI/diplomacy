@@ -18,7 +18,7 @@ POWERS = ['AUSTRIA', 'ENGLAND', 'FRANCE', 'GERMANY', 'ITALY', 'RUSSIA', 'TURKEY'
 async def create_game(game_id, hostname='localhost', port=8432):
     """ Creates a game on the server """
     connection = await connect(hostname, port)
-    channel = await connection.authenticate('random_user', 'password')
+    channel = await connection.authenticate('kshenoy', 'password')
     # await channel.create_game(game_id=game_id, rules={'REAL_TIME', 'NO_DEADLINE', 'POWER_CHOICE'})
     print(channel.list_games(game_id=game_id))
     await channel.join_game(game_id=game_id)
