@@ -1,13 +1,13 @@
 import asyncio
 import random
 
-from diplomacy.agents.baseline_bots.loyal_bot import LoyalBot
-from diplomacy.agents.baseline_bots.pushover_bot import PushoverBot
-# from diplomacy.agents.baseline_bots.random_allier_proposer_bot import RandomAllierProposerBot
-from diplomacy.agents.baseline_bots.random_honest_bot import RandomHonestBot
-from diplomacy.agents.baseline_bots.random_honest_order_accepter_bot import RandomHonestAccepterBot
-from diplomacy.agents.baseline_bots.random_proposer_bot import RandomProposerBot
-from diplomacy.agents.baseline_bots.random_support_proposer_bot import RandomSupportProposerBot
+# from diplomacy.agents.baseline_bots.loyal_bot import LoyalBot
+# from diplomacy.agents.baseline_bots.pushover_bot import PushoverBot
+# # from diplomacy.agents.baseline_bots.random_allier_proposer_bot import RandomAllierProposerBot
+# from diplomacy.agents.baseline_bots.random_honest_bot import RandomHonestBot
+# from diplomacy.agents.baseline_bots.random_honest_order_accepter_bot import RandomHonestAccepterBot
+from agents.baseline_bots.random_proposer_bot import RandomProposerBot
+# from diplomacy.agents.baseline_bots.random_support_proposer_bot import RandomSupportProposerBot
 from diplomacy.client.connection import connect
 from diplomacy.utils import exceptions
 import argparse
@@ -33,18 +33,18 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
         await asyncio.sleep(1.)
     game = await channel.join_game(game_id=game_id, power_name=power_name)
     bot = None
-    if botname == 'random_support_proposer':
-        bot = RandomSupportProposerBot(power_name, game)
-    elif botname == 'random_honest':
-        bot = RandomHonestBot(power_name, game)
-    elif botname == 'random_honest_order_acceptor':
-        bot = RandomHonestAccepterBot(power_name, game)
-    elif botname == 'random_proposer':
+    # if botname == 'random_support_proposer':
+    #     bot = RandomSupportProposerBot(power_name, game)
+    # elif botname == 'random_honest':
+    #     bot = RandomHonestBot(power_name, game)
+    # elif botname == 'random_honest_order_acceptor':
+    #     bot = RandomHonestAccepterBot(power_name, game)
+    if botname == 'random_proposer':
         bot = RandomProposerBot(power_name, game)
-    elif botname == 'loyal':
-        bot = LoyalBot(power_name, game)
-    elif botname == 'pushover':
-        bot = PushoverBot(power_name, game)
+    # elif botname == 'loyal':
+    #     bot = LoyalBot(power_name, game)
+    # elif botname == 'pushover':
+    #     bot = PushoverBot(power_name, game)
     # elif botname == 'random_allier_proposer':
     #     bot = RandomAllierProposerBot(power_name, game)
 
