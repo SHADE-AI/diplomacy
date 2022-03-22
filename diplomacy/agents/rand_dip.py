@@ -66,7 +66,7 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
         else:
             messages, orders = bot.act()
             for msg in messages:
-                game.add_message(Message(
+                await game.send_game_message(Message(
                     sender=msg[0],
                     recipient=msg[1],
                     # convert the random orders to a str
@@ -81,7 +81,7 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
     # To download a copy of the game with messages from all powers, you need to export the game as an admin
     # by logging in as 'admin' / 'password'
 
-async def launch(game_id, hostname, botname, powers=None, ):
+async def launch(game_id, hostname, botname, powers=None):
     """ Creates and plays a network game """
     # await create_game(game_id, hostname)
     if powers is None:
@@ -98,10 +98,11 @@ def parse_args():
                         help='botname for all powers')
 
     args = parser.parse_args()
+    print(args)
     return args
 
 if __name__ == '__main__':
     args = parse_args()
     # asyncio.run(launch(game_id='admin_1643762757865'))
-    asyncio.run(launch(args.gameid, args.hostname, args.powers))
+    asyncio.run(launch(args.gameid, args.hostname, args.bots, args.powers))
 
