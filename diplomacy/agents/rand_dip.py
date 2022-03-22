@@ -16,13 +16,13 @@ import argparse
 POWERS = ['AUSTRIA', 'ENGLAND', 'FRANCE', 'GERMANY', 'ITALY', 'RUSSIA', 'TURKEY']
 # POWERS = ['TURKEY']
 
-async def create_game(game_id, hostname='localhost', port=8432):
-    """ Creates a game on the server """
-    connection = await connect(hostname, port)
-    channel = await connection.authenticate('random_user', 'password')
-    # await channel.create_game(game_id=game_id, rules={'REAL_TIME', 'NO_DEADLINE', 'POWER_CHOICE'})
-    print(channel.list_games(game_id=game_id))
-    await channel.join_game(game_id=game_id)
+# async def create_game(game_id, hostname='localhost', port=8432):
+#     """ Creates a game on the server """
+#     connection = await connect(hostname, port)
+#     channel = await connection.authenticate('random_user', 'password')
+#     # await channel.create_game(game_id=game_id, rules={'REAL_TIME', 'NO_DEADLINE', 'POWER_CHOICE'})
+#     print(channel.list_games(game_id=game_id))
+#     await channel.join_game(game_id=game_id)
 
 async def play(game_id, botname, power_name, hostname='localhost', port=8432):
     """ Play as the specified power """
@@ -66,13 +66,13 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
         else:
             messages, orders = bot.act()
             for msg in messages:
-                await game.add_message(Message(
+                msg_obj = Message(
                     sender=msg[0],
                     recipient=msg[1],
-                    # convert the random orders to a str
                     message=msg[2],
                     phase=game.get_current_phase(),
-                ))
+                )
+                await game.send_game_message(msg_obj)
             print("Submitted orders")
             await game.set_orders(power_name=power_name, orders=orders, wait=False)
         # Waiting for game to be processed

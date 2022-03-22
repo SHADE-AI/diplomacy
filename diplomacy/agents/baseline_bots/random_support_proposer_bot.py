@@ -41,7 +41,7 @@ class RandomSupportProposerBot(BaselineBot):
 
             for order in possible_orders:
                 order_tokens = get_order_tokens(order)
-                if order_tokens[1] != 'S':
+                if len(order_tokens) <= 1 or order_tokens[1] != 'S':
                     continue
                 if len(order_tokens) != 4 or order_tokens[2].split()[1] not in provs or order_tokens[3].split()[1] not in n_provs:
                     continue
