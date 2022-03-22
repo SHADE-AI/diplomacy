@@ -73,6 +73,7 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
                     message=msg[2],
                     phase=game.get_current_phase(),
                 ))
+            print("Submitted orders")
             await game.set_orders(power_name=power_name, orders=orders, wait=False)
         # Waiting for game to be processed
         while current_phase == game.get_current_phase():
