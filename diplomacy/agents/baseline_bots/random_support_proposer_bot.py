@@ -22,41 +22,41 @@ class RandomSupportProposerBot(BaselineBot):
     def act(self):
         #TODO: Ensure that supporting province and province to be attacked are not owned by the same power
         #TODO: Sanity check: If current phase fetched is not matching with server phase, skip execution
-
-        #TODO: Replace orderable locations with all possible units of a power if needed
-        self.possible_orders = self.game.get_all_possible_orders()
-        provs = [loc.upper() for loc in self.game.get_orderable_locations(self.power_name)]
-
-        n_provs = set()
-        for prov in provs:
-            n_provs.update(set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2.upper().split('/')[0] not in provs]))
-        n2n_provs = set()
-        for prov in n_provs:
-            n2n_provs.update(
-                set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2.upper().split('/')[0] not in provs and prov2.upper().split('/')[0] not in n_provs]))
-        # print(provs)
-        # print(n_provs)
-        # print(n2n_provs)
-        possible_support_proposals = defaultdict(list)
-        for n2n_p in n2n_provs:
-            if not(self.possible_orders[n2n_p]):
-                continue
-            possible_orders = self.possible_orders[n2n_p]
-
-            for order in possible_orders:
-                order_tokens = get_order_tokens(order)
-                if len(order_tokens) <= 1 or order_tokens[1] != 'S':
-                    continue
-                if len(order_tokens) != 4 or order_tokens[2].split()[1] not in provs or order_tokens[3].split()[1] not in n_provs:
-                    continue
-                possible_support_proposals[(order_tokens[2].split()[1], order_tokens[3].split()[1])].append((order_tokens[0], order))
         final_messages = defaultdict(list)
+        if game.get_current_phase()[0] != 'W':
+            #TODO: Replace orderable locations with all possible units of a power if needed
+            self.possible_orders = self.game.get_all_possible_orders()
+            provs = [loc.upper() for loc in self.game.get_orderable_locations(self.power_name)]
 
-        for attack_key in possible_support_proposals:
-            selected_order = random.choice(possible_support_proposals[attack_key])
-            if self.game._unit_owner(selected_order[0]) is None:
-                raise "Coding Error"
-            final_messages[self.game._unit_owner(selected_order[0]).name].append(selected_order[1])
+            n_provs = set()
+            for prov in provs:
+                n_provs.update(set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2.upper().split('/')[0] not in provs]))
+            n2n_provs = set()
+            for prov in n_provs:
+                n2n_provs.update(
+                    set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2.upper().split('/')[0] not in provs and prov2.upper().split('/')[0] not in n_provs]))
+            # print(provs)
+            # print(n_provs)
+            # print(n2n_provs)
+            possible_support_proposals = defaultdict(list)
+            for n2n_p in n2n_provs:
+                if not(self.possible_orders[n2n_p]):
+                    continue
+                possible_orders = self.possible_orders[n2n_p]
+
+                for order in possible_orders:
+                    order_tokens = get_order_tokens(order)
+                    if len(order_tokens) <= 1 or order_tokens[1] != 'S':
+                        continue
+                    if len(order_tokens) != 4 or order_tokens[2].split()[1] not in provs or order_tokens[3].split()[1] not in n_provs:
+                        continue
+                    possible_support_proposals[(order_tokens[2].split()[1], order_tokens[3].split()[1])].append((order_tokens[0], order))
+
+            for attack_key in possible_support_proposals:
+                selected_order = random.choice(possible_support_proposals[attack_key])
+                if self.game._unit_owner(selected_order[0]) is None:
+                    raise "Coding Error"
+                final_messages[self.game._unit_owner(selected_order[0]).name].append(selected_order[1])
 
         messages = []
         for recipient in final_messages:

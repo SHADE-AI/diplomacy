@@ -72,6 +72,7 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
                         sender=power_name,
                         recipient=msg[1],
                         message=msg[2],
+                        phase=game.get_current_phase(),
                     )
                     await game.send_game_message(message=msg_obj)
             # print("Submitted orders")
