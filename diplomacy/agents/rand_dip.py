@@ -65,17 +65,18 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
             # await game.send_game_message(message=game.new_power_message('FRANCE', 'This is the message'))
         else:
             messages, orders = bot.act()
-            print(power_name, messages)
-            for msg in messages:
-                msg_obj = Message(
-                    sender=power_name,
-                    recipient=msg[1],
-                    message=msg[2],
-                    phase=game.get_current_phase(),
-                )
-                await game.send_game_message(message=msg_obj)
-            print("Submitted orders")
-            await game.set_orders(power_name=power_name, orders=orders, wait=False)
+            if messages is not None:
+                # print(power_name, messages)
+                for msg in messages:
+                    msg_obj = Message(
+                        sender=power_name,
+                        recipient=msg[1],
+                        message=msg[2],
+                    )
+                    await game.send_game_message(message=msg_obj)
+            # print("Submitted orders")
+            if orders is not None:
+                await game.set_orders(power_name=power_name, orders=orders, wait=False)
         # Waiting for game to be processed
         while current_phase == game.get_current_phase():
             await asyncio.sleep(0.1)
