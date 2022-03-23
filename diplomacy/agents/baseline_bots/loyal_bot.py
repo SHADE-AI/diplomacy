@@ -4,10 +4,10 @@ __email__ = "sanderschulhoff@gmail.com"
 from lib2to3.pgen2.parse import ParseError
 
 from diplomacy import Message
-from random_allier_proposer_bot import RandomAllierProposerBot
-from daide_utils import parse_orr_xdo, parse_alliance_proposal, get_non_aggressive_orders, YES
+from diplomacy.agents.baseline_bots.random_allier_proposer_bot import RandomAllierProposerBot
+from diplomacy.agents.baseline_bots.daide_utils import parse_orr_xdo, parse_alliance_proposal, get_non_aggressive_orders, YES
 
-from baseline_bot import BaselineBot
+from diplomacy.agents.baseline_bots.baseline_bot import BaselineBot
 
 class LoyalBot(BaselineBot):
     """
