@@ -21,9 +21,11 @@ class RandomSupportProposerBot(BaselineBot):
 
     def act(self):
         #TODO: Ensure that supporting province and province to be attacked are not owned by the same power
-        #TODO: Sanity check: If current phase fetched is not matching with server phase, skip execution
+        #TODO: Ensure that attack should not be to a province that the power already owns
         final_messages = defaultdict(list)
-        if game.get_current_phase()[0] != 'W':
+
+        #TODO: Some scenario is getting missed out | Sanity check: If current phase fetched is not matching with server phase, skip execution
+        if self.game.get_current_phase()[0] != 'W':
             #TODO: Replace orderable locations with all possible units of a power if needed
             self.possible_orders = self.game.get_all_possible_orders()
             provs = [loc.upper() for loc in self.game.get_orderable_locations(self.power_name)]
@@ -35,9 +37,7 @@ class RandomSupportProposerBot(BaselineBot):
             for prov in n_provs:
                 n2n_provs.update(
                     set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2.upper().split('/')[0] not in provs and prov2.upper().split('/')[0] not in n_provs]))
-            # print(provs)
-            # print(n_provs)
-            # print(n2n_provs)
+
             possible_support_proposals = defaultdict(list)
             for n2n_p in n2n_provs:
                 if not(self.possible_orders[n2n_p]):
@@ -79,11 +79,24 @@ if __name__ == "__main__":
     game = Game()
     powers = list(game.get_map_power_names())
     # select the first name in the list of powers
-    bot_power = powers[0]
-    # instantiate proposed random honest bot
-    bot = RandomSupportProposerBot(bot_power, game)
+    bots = [(bot_power, RandomSupportProposerBot(bot_power, game)) for bot_power in powers]
+
     while not game.is_game_done:
-        bot.act()
+        for power_name, bot in bots:
+            messages, orders = bot.act()
+            if messages is not None:
+                # print(power_name, messages)
+                for msg in messages:
+                    msg_obj = Message(
+                        sender=power_name,
+                        recipient=msg[1],
+                        message=msg[2],
+                        phase=game.get_current_phase(),
+                    )
+                    game.add_message(message=msg_obj)
+            # print("Submitted orders")
+            if orders is not None:
+                game.set_orders(power_name=power_name, orders=orders)
         game.process()
 
     to_saved_game_format(game, output_path='RandomSupportProposerBot.json')
