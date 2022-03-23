@@ -20,6 +20,7 @@ class RandomSupportProposerBot(BaselineBot):
         super().__init__(power_name, game)
 
     def act(self):
+        #TODO: Replace orderable locations with all possible units of a power
         self.possible_orders = self.game.get_all_possible_orders()
         provs = [loc.upper() for loc in self.game.get_orderable_locations(self.power_name)]
 

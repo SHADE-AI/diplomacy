@@ -65,14 +65,15 @@ async def play(game_id, botname, power_name, hostname='localhost', port=8432):
             # await game.send_game_message(message=game.new_power_message('FRANCE', 'This is the message'))
         else:
             messages, orders = bot.act()
+            print(power_name, messages)
             for msg in messages:
                 msg_obj = Message(
-                    sender=msg[0],
+                    sender=power_name,
                     recipient=msg[1],
                     message=msg[2],
                     phase=game.get_current_phase(),
                 )
-                await game.send_game_message(msg_obj)
+                await game.send_game_message(message=msg_obj)
             print("Submitted orders")
             await game.set_orders(power_name=power_name, orders=orders, wait=False)
         # Waiting for game to be processed
