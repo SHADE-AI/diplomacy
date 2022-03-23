@@ -26,11 +26,11 @@ class RandomSupportProposerBot(BaselineBot):
 
         n_provs = set()
         for prov in provs:
-            n_provs.update(set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2 not in provs]))
+            n_provs.update(set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2.upper() not in provs]))
         n2n_provs = set()
         for prov in n_provs:
             n2n_provs.update(
-                set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2 not in provs and prov2 not in n_provs]))
+                set([prov2.upper() for prov2 in self.game.map.abut_list(prov) if prov2.upper() not in provs and prov2.upper() not in n_provs]))
         # print(provs)
         # print(n_provs)
         # print(n2n_provs)
