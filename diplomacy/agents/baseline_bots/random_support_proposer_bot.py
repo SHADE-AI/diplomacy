@@ -48,6 +48,10 @@ class RandomSupportProposerBot(BaselineBot):
                     continue
                 possible_support_proposals[(order_tokens[2].split()[1], order_tokens[3].split()[1])].append((order_tokens[0], order))
         final_messages = defaultdict(list)
+        if self.power_name == 'RUSSIA':
+            print(provs)
+            print(n_provs)
+            print(n2n_provs)
         for attack_key in possible_support_proposals:
             selected_order = random.choice(possible_support_proposals[attack_key])
             if self.game._unit_owner(selected_order[0]) is None:
