@@ -12,6 +12,15 @@ import logging
 from diplomacy import Game
 from diplomacy.integration.webdiplomacy_net.orders import Order
 from diplomacy.integration.webdiplomacy_net.utils import CACHE
+from diplomacy.engine.message import Message, GLOBAL
+from diplomacy.utils.game_phase_data import MESSAGES_TYPE
+from diplomacy.utils import parsing
+from diplomacy.utils.sorted_dict import SortedDict
+
+
+MESSAGES_TYPE = parsing.IndexedSequenceType(
+    parsing.DictType(int, parsing.JsonableClassType(Message), SortedDict.builder(int, Message)), 'time_sent')
+#messages: parsing.DefaultValueType(MESSAGES_TYPE, [])
 
 # Constants
 LOGGER = logging.getLogger(__name__)
@@ -19,6 +28,9 @@ LOGGER = logging.getLogger(__name__)
 
 def turn_to_phase(turn, phase):
     """ Converts a turn and phase to a short phase name e.g. turn 1 - phase 'Retreats' to 'F1901R' """
+    if phase == 'Finished':
+        return("COMPLETED")
+
     year = 1901 + turn // 2
     season = 'S' if turn % 2 == 0 else 'F'
     if phase == 'Builds':
@@ -165,6 +177,23 @@ def order_dict_to_str(order_dict, phase, map_id=1):
     # Returning
     return power_name, order.to_string()
 
+def message_dict_to_str(message_dict, phase, map_id = 1):
+
+    req_fields = ('fromCountryID', 'toCountryID', 'message', 'timeSent')
+    if [1 for field in req_fields if field not in message_dict]:
+        LOGGER.error('The required fields for order dict are %s. Cannot translate %s', req_fields, message_dict)
+        return ''
+
+    phase = phase
+    message = message_dict['message']
+    toCountryID = message_dict['toCountryID']
+    fromCountryID = message_dict['fromCountryID']
+    timeSent = message_dict['timeSent']
+
+    toPower = CACHE[map_id]['ix_to_power'][toCountryID]
+    fromPower = CACHE[map_id]['ix_to_power'][fromCountryID]
+
+    return Message(phase=phase, sender=fromPower, recipient=toPower, message=message, time_sent = timeSent)
 
 # Format:
 # {'turn':       integer,
@@ -172,7 +201,7 @@ def order_dict_to_str(order_dict, phase, map_id=1):
 #  'units':      [],
 #  'centers':    [],
 #  'orders':     []}
-def process_phase_dict(phase_dict, map_id=1):
+def process_phase_dict(phase_dict, map_id=1, press=False):
     """ Converts a phase dict to its string representation """
     phase = turn_to_phase(phase_dict.get('turn', 0), phase_dict.get('phase', 'Diplomacy'))
 
@@ -208,11 +237,22 @@ def process_phase_dict(phase_dict, map_id=1):
             orders_per_power[power_name] = []
         orders_per_power[power_name].append(order)
 
+    #Processing messages
+    messageList = SortedDict(int, Message)
+    if press:
+        for message_dict in phase_dict.get('messages', []):
+            msg = message_dict_to_str(message_dict, phase, map_id = map_id)
+            messageList.put(msg.time_sent, msg)
+
+
+
     # Returning
     return {'name': phase,
             'units': units_per_power,
             'centers': centers_per_power,
-            'orders': orders_per_power}
+            'orders': orders_per_power,
+            'messages': messageList
+            }
 
 
 # Format:
@@ -247,12 +287,20 @@ def state_dict_to_game_and_power(state_dict, country_id, max_phases=None):
     map_id = int(state_dict['variantID'])
     standoffs = state_dict['standoffs']
     occupied_from = state_dict['occupiedFrom']
+    press = False
+    gameOver = state_dict['gameOver']
+
+    if state_dict['pressType'] in ["Regular", "PublicPressOnly", "RulebookPress"]:
+        press = True
+    else:
+        if state_dict['pressType'] == "NoPress":
+            press = False
 
     # Parsing all phases
     state_dict_phases = state_dict.get('phases', [])
     if max_phases is not None and isinstance(max_phases, int):
         state_dict_phases = state_dict_phases[-1 * max_phases:]
-    all_phases = [process_phase_dict(phase_dict, map_id=map_id) for phase_dict in state_dict_phases]
+    all_phases = [process_phase_dict(phase_dict, map_id=map_id, press=press) for phase_dict in state_dict_phases]
 
     # Building game - Replaying the last phases
     game = Game(game_id=game_id, map_name=CACHE['ix_to_map'][map_id])
@@ -279,6 +327,11 @@ def state_dict_to_game_and_power(state_dict, country_id, max_phases=None):
             if power_name == 'GLOBAL':
                 continue
             game.set_orders(power_name, power_orders)
+
+        if press:
+            for time_sent, msg in phase_to_replay['messages'].items():
+                game.add_message_webdip_int(msg)
+
 
         # Processing
         game.process()

@@ -964,6 +964,12 @@ class Game(Jsonable):
     # Observer game should not see votes.
     # Power game should know only vote of related power (votes for all other power should be 'neutral' in a power game).
 
+    def add_message_webdip_int(self, message):
+        if message.time_sent is None:
+            logging.ERROR("Message not formatted correctly")
+
+        self.messages.put(message.time_sent, message)
+
     def has_draw_vote(self):
         """ Return True if all controlled non-eliminated powers have voted YES to draw game at current phase. """
         assert self.is_server_game() or self.is_omniscient_game()
