@@ -115,7 +115,8 @@ def on_game_message_received(game, notification):
         :type game: diplomacy.client.network_game.NetworkGame
         :type notification: diplomacy.communication.notifications.GameMessageReceived
     """
-    Game.add_message(game, notification.message)
+    if notification.message.time_sent != 0:
+        Game.add_message(game, notification.message)
 
 def on_game_processed(game, notification):
     """ Manage notification GamePhaseUpdate (for omniscient and observer games).

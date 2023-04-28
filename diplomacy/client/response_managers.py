@@ -232,7 +232,10 @@ def on_send_game_message(context, response):
     request = context.request  # type: requests.SendGameMessage
     message = request.message
     message.time_sent = response.data
-    Game.add_message(context.game, message)
+    if message.time_sent == 0:
+        return 0
+    
+    return Game.add_message(context.game, message)
 
 def on_set_game_state(context, response):
     """ Manage response for request SetGameState.
