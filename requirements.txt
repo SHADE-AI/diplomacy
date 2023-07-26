@@ -5,4 +5,4 @@ pytz
 tornado>=5.0
 tqdm
 ujson
-
+requests

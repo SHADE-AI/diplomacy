@@ -12,6 +12,7 @@ __pycache__/
 .notes
 .idea
 .Python
+data/
 env/
 venv-dip/
 build/
