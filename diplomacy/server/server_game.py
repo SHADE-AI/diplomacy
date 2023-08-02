@@ -234,6 +234,9 @@ class ServerGame(Game):
     def is_controlled_by(self, power_name, username):
         """ (for server game) Return True if given power name is controlled by given username. """
         return self.get_power(power_name).is_controlled_by(username)
+    
+    def has_advisor(self, power_name):
+        return self.get_power(power_name).has_advisor()
 
     def get_observer_level(self, username):
         """ Return the highest observation level allowed for given username.
@@ -253,6 +256,8 @@ class ServerGame(Game):
         """ Generate addresses (couple [power name, token]) of all users implied in this game. """
         for power in self.powers.values():  # type: Power
             for token in power.tokens:
+                yield (power.name, token)
+            for token in power.advisor_tokens:
                 yield (power.name, token)
         for token in self.observer.tokens:
             yield (self.observer.name, token)
@@ -293,6 +298,20 @@ class ServerGame(Game):
         """
         for token in self.get_power(power_name).tokens:
             yield (power_name, token)
+        for token in self.get_power(power_name).advisor_tokens:
+            yield (power_name, token)
+
+    def get_power_addresses_no_advisor(self, power_name):
+        for token in self.get_power(power_name).tokens:
+            yield (power_name, token)
+
+    def get_power_advisor_address(self, power_name):
+        advisor_tokens = list(self.get_power(power_name).advisor_tokens)
+        if len(advisor_tokens) > 0:
+            advisor_tokens = advisor_tokens[0]
+        return advisor_tokens
+        #for token in self.get_power(power_name).advisor_tokens:
+        #    yield (power_name, token)
 
     def has_player(self, username):
         """ (for server game) Return True if given username controls any map power. """
@@ -302,6 +321,10 @@ class ServerGame(Game):
         """ Return True if game has given token (either observer, omniscient or player). """
         return self.omniscient.has_token(token) or self.observer.has_token(token) or any(
             power.has_token(token) for power in self.powers.values())
+    
+    def has_advisor_token(self, power_name, token):
+        '''Return True if token is an advisor token for specified power name '''
+        return self.get_power(power_name).has_advisor_token(token)
 
     def has_observer_token(self, token):
         """ Return True if game has given observer token. """
@@ -323,6 +346,13 @@ class ServerGame(Game):
             :return: a boolean
         """
         return self.get_power(power_name).has_token(token)
+
+    def power_has_advisor_token(self, power_name, token):
+        """ Return True if given power has given advisor token
+        """
+        return self.get_power(power_name).has_advisor_token(token)
+        
+
 
     def add_omniscient_token(self, token):
         """ Set given token as omniscient token. """

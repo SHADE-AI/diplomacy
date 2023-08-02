@@ -62,7 +62,7 @@ class Power(Jsonable):
     """
     __slots__ = ['game', 'name', 'abbrev', 'adjust', 'centers', 'units', 'influence', 'homes',
                  'retreats', 'goner', 'civil_disorder', 'orders', 'role', 'controller', 'vote',
-                 'order_is_set', 'wait', 'tokens', 'comm_status','player_type']
+                 'order_is_set', 'wait', 'tokens', 'comm_status','player_type', 'advisor_tokens']
     model = {
         strings.ABBREV: parsing.OptionalValueType(str),
         strings.ADJUST: parsing.DefaultValueType(parsing.SequenceType(str), []),
@@ -77,6 +77,7 @@ class Power(Jsonable):
         strings.RETREATS: parsing.DefaultValueType(parsing.DictType(str, parsing.SequenceType(str)), {}),
         strings.ROLE: parsing.DefaultValueType(str, strings.SERVER_TYPE),
         strings.TOKENS: parsing.DefaultValueType(parsing.SequenceType(str, set), ()),
+        strings.ADVISOR_TOKENS: parsing.DefaultValueType(parsing.SequenceType(str, set), ()),
         strings.UNITS: parsing.DefaultValueType(parsing.SequenceType(str), []),
         strings.VOTE: parsing.DefaultValueType(parsing.EnumerationType(strings.ALL_VOTE_DECISIONS), strings.NEUTRAL),
         strings.WAIT: parsing.DefaultValueType(bool, True),
@@ -103,6 +104,7 @@ class Power(Jsonable):
         self.comm_status = strings.BUSY
         self.player_type = strings.NONE
         self.tokens = set()
+        self.advisor_tokens = set()
         super(Power, self).__init__(name=name, **kwargs)
         assert self.role in strings.ALL_ROLE_TYPES or self.role == self.name
         if not self.controller:
@@ -355,6 +357,9 @@ class Power(Jsonable):
     def is_controlled(self):
         """ (Network Method) Return True if this power is controlled. """
         return self.controller.last_value() != strings.DUMMY
+    
+    def has_advisor(self):
+        return(bool(self.advisor_tokens))
 
     def does_not_wait(self):
         """ (Network Method) Return True if this power does not wait
@@ -413,11 +418,19 @@ class Power(Jsonable):
         """ (Server Method) Return True if this power has given token. """
         assert self.is_server_power()
         return token in self.tokens
+    
 
     def add_token(self, token):
         """ (Server Method) Add given token to this power. """
         assert self.is_server_power()
         self.tokens.add(token)
+
+    def add_advisor_token(self, token):
+        assert self.is_server_power()
+        self.advisor_tokens.add(token)
+
+    def has_advisor_token(self, token):
+        return token in self.advisor_tokens
 
     def remove_tokens(self, tokens):
         """ (Server Method) Remove sequence of tokens from this power. """

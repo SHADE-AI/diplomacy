@@ -475,6 +475,15 @@ def on_join_game(server, request, connection_handler):
             client_game = server_game.as_power_game(power_name)
             return responses.DataGame(data=client_game, request_id=request.request_id)
 
+        # If player type is an advisor, register token return 
+        if player_type == strings.ADVISOR:
+            #allow only 1 advisor per power
+            if server_game.has_advisor(power_name):
+                raise exceptions.ResponseException(f"{power_name} already has an assigned advisor")
+            server_game.get_power(power_name).add_advisor_token(token)
+            client_game = server_game.as_power_game(power_name)
+            return responses.DataGame(data=client_game, request_id=request.request_id)
+
         # Power already controlled by request sender.
         if server_game.is_controlled_by(power_name, username):
 
@@ -799,6 +808,7 @@ def on_send_daide_composer_message(server, request, connection_handler):
 
     if not level.game.has_power(message.sender):
         raise exceptions.MapPowerException(message.sender)
+    
     if not request.message.is_global():
         if level.game.public_press:
             raise exceptions.ResponseException('Only public messages allowed for this game.')
@@ -817,6 +827,7 @@ def on_send_daide_composer_message(server, request, connection_handler):
 
         new_message_obj_str = negotiation.pressgloss(message, level.game.message_history, level.game.messages, level.game.powers, return_message_obj_str=True)
         return responses.DataToken(data=new_message_obj_str, request_id=request.request_id)
+    
 
 
 def on_send_game_message(server, request, connection_handler):
@@ -851,9 +862,10 @@ def on_send_game_message(server, request, connection_handler):
         username = server.users.get_name(token)
         power_name = message.sender
         if not level.game.is_controlled_by(power_name, username):
-            raise exceptions.ResponseException('Power name %s is not controlled by given username.' % power_name)
-        if message.sender == message.recipient:
-            raise exceptions.ResponseException('A power cannot send message to itself.')
+            if not level.game.has_advisor_token(power_name, request.token):
+                raise exceptions.ResponseException('Power name %s is not controlled by given username.' % power_name)
+        #if message.sender == message.recipient:   
+        #   raise exceptions.ResponseException('A power cannot send message to itself.')
 
     if request.re_sent:
         # Request is re-sent (e.g. after a synchronization). We may have already received this message.
@@ -870,7 +882,39 @@ def on_send_game_message(server, request, connection_handler):
     if message.time_sent is not None:
         raise exceptions.ResponseException('Server cannot receive a message with a time sent already set.')
     message.time_sent = level.game.add_message(message)
-    Notifier(server, ignore_addresses=[(request.game_role, token)]).notify_game_message(level.game, message)
+
+    ignore_addresses = [(request.game_role, token)]
+
+    #if power has an advisor we need to ignore that address too
+    if message.sender != message.recipient:
+        if level.game.has_advisor(message.sender):
+            advisor_address = level.game.get_power_advisor_address(message.sender)
+            ignore_addresses.append((request.game_role, advisor_address))
+        Notifier(server, ignore_addresses=ignore_addresses).notify_game_message(level.game, message)
+
+    if message.sender == message.recipient:
+        #determine if sender is advisor or power
+        is_player_token = level.game.power_has_token(power_name, token)
+        is_advisor_token = level.game.has_advisor_token(power_name, token)
+        recipient = ''
+        if is_player_token:
+            #recipient must be advisor if there is one
+            if level.game.has_advisor(message.sender):
+                recipient = [(power_name, level.game.get_power_advisor_address(message.sender))]
+            else:
+                raise exceptions.ResponseException('Power does not have an assigned advisor')
+        elif is_advisor_token:
+            recipient = level.game.get_power_addresses_no_advisor(power_name)
+        else:
+            raise exceptions.ResponseException('Token is neither an advisor nor player')
+        
+        
+        Notifier(server).notify_game_addresses(level.game.game_id, recipient, notifications.GameMessageReceived, message=message)
+
+
+
+    
+    #Notifier(server, ignore_addresses=ignore_addresses).notify_game_message(level.game, message)
     server.save_game(level.game)
     return responses.DataTimeStamp(data=message.time_sent, request_id=request.request_id)
 

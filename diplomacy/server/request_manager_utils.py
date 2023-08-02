@@ -233,7 +233,9 @@ def verify_request(server, request, connection_handler,
         # We don't care anymore if sender token is currently associated to this power,
         # as long as sender is registered as the controller of this power.
         if not server_game.is_controlled_by(power_name, server.users.get_name(request.token)):
-            raise exceptions.ResponseException('User %s does not currently control power %s'
+            #if token does not belong to an advisor, raise exception, otherwise continue
+            if not server_game.has_advisor_token(power_name, request.token):
+                raise exceptions.ResponseException('User %s does not currently control power %s'
                                                % (server.users.get_name(request.token), power_name))
 
         # Create game request level.

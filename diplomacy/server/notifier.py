@@ -117,7 +117,13 @@ class Notifier:
                                                   game_id=game_id,
                                                   game_role=power.name,
                                                   **kwargs))
-
+            
+        #also notify advisor tokens
+        for token in power.advisor_tokens:
+            yield self._notify(notification_class(token=token,
+                                                  game_id=game_id,
+                                                  game_role=power.name,
+                                                  **kwargs))
     @gen.coroutine
     def notify_game_processed(self, server_game, previous_phase_data, current_phase_data):
         """ Notify all game tokens about a game phase update (game processing).
