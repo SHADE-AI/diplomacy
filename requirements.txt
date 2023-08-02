@@ -2,6 +2,7 @@ bcrypt
 coloredlogs
 python-dateutil
 pytz
+requests
 tornado>=5.0
 tqdm
 ujson
