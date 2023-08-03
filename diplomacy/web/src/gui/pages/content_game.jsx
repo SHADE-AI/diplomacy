@@ -1510,7 +1510,9 @@ export class ContentGame extends React.Component {
     renderCurrentMessages(engine, role) {
         const messageChannels = engine.getMessageChannels(role, true);
         const tabNames = [];
-        for (let powerName of Object.keys(engine.powers)) if (powerName !== role)
+        //for (let powerName of Object.keys(engine.powers)) if (powerName !== role)
+        //    tabNames.push(powerName);
+        for (let powerName of Object.keys(engine.powers))
             tabNames.push(powerName);
         tabNames.sort();
         tabNames.push('GLOBAL');

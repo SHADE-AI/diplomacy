@@ -402,9 +402,9 @@ def to_tens(daide_text, tones):
         Optional tones.
 
     """
-    if not diplomacy.settings.PRESSGLOS_URL:
+    if not diplomacy.settings.PRESSGLOSS_URL:
         LOGGER.info("Skipping sending DAIDE to Pressgloss API")
-        return None
+        return "Ahem."
     
     LOGGER.info("Sending DAIDE to Pressgloss API")
     endpoint = f"{diplomacy.settings.PRESSGLOSS_URL}/daide2gloss"

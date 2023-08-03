@@ -235,6 +235,9 @@ class ServerGame(Game):
         """ (for server game) Return True if given power name is controlled by given username. """
         return self.get_power(power_name).is_controlled_by(username)
     
+    def is_advised_by(self, power_name, username):
+        return self.get_power(power_name).is_advised_by(username)
+    
     def has_advisor(self, power_name):
         return self.get_power(power_name).has_advisor()
 
@@ -392,6 +395,11 @@ class ServerGame(Game):
             raise exceptions.ResponseException('Power already controlled by another user.')
         power.set_controlled(username, player_type)
         power.add_token(token)
+
+    def set_advisor(self, power_name, username, token):
+        power = self.get_power(power_name)
+        power.set_advisor(username)
+        power.add_advisor_token(token)
 
     def remove_observer_token(self, token):
         """ Remove given observer token. """

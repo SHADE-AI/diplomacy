@@ -62,7 +62,7 @@ class Power(Jsonable):
     """
     __slots__ = ['game', 'name', 'abbrev', 'adjust', 'centers', 'units', 'influence', 'homes',
                  'retreats', 'goner', 'civil_disorder', 'orders', 'role', 'controller', 'vote',
-                 'order_is_set', 'wait', 'tokens', 'comm_status','player_type', 'advisor_tokens']
+                 'order_is_set', 'wait', 'tokens', 'comm_status','player_type', 'advisor_tokens', 'advisor']
     model = {
         strings.ABBREV: parsing.OptionalValueType(str),
         strings.ADJUST: parsing.DefaultValueType(parsing.SequenceType(str), []),
@@ -78,6 +78,7 @@ class Power(Jsonable):
         strings.ROLE: parsing.DefaultValueType(str, strings.SERVER_TYPE),
         strings.TOKENS: parsing.DefaultValueType(parsing.SequenceType(str, set), ()),
         strings.ADVISOR_TOKENS: parsing.DefaultValueType(parsing.SequenceType(str, set), ()),
+        strings.ADVISOR: parsing.DefaultValueType(str, strings.ADVISOR),
         strings.UNITS: parsing.DefaultValueType(parsing.SequenceType(str), []),
         strings.VOTE: parsing.DefaultValueType(parsing.EnumerationType(strings.ALL_VOTE_DECISIONS), strings.NEUTRAL),
         strings.WAIT: parsing.DefaultValueType(bool, True),
@@ -105,6 +106,7 @@ class Power(Jsonable):
         self.player_type = strings.NONE
         self.tokens = set()
         self.advisor_tokens = set()
+        self.advisor = ''
         super(Power, self).__init__(name=name, **kwargs)
         assert self.role in strings.ALL_ROLE_TYPES or self.role == self.name
         if not self.controller:
@@ -390,6 +392,9 @@ class Power(Jsonable):
         elif self.controller.last_value() != username:
             raise DiplomacyException('Power already controlled by someone else. Kick previous controller before.')
 
+    def set_advisor(self, username):
+        self.advisor = username
+
     def get_controller(self):
         """ (Network Method) Return current power controller name ('dummy' if power is not controlled). """
         return self.controller.last_value()
@@ -411,6 +416,9 @@ class Power(Jsonable):
             # Bot is connected if power is dummy and has some associated tokens.
             return self.is_dummy() and bool(self.tokens)
         return self.controller.last_value() == username
+
+    def is_advised_by(self, username):
+        return self.advisor == username
 
     # Server-only methods.
 

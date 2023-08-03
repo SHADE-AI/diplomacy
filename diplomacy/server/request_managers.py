@@ -479,8 +479,21 @@ def on_join_game(server, request, connection_handler):
         if player_type == strings.ADVISOR:
             #allow only 1 advisor per power
             if server_game.has_advisor(power_name):
-                raise exceptions.ResponseException(f"{power_name} already has an assigned advisor")
-            server_game.get_power(power_name).add_advisor_token(token)
+
+                #check if current username is advisor
+                if server_game.is_advised_by(power_name, username):
+                    client_game = server_game.as_power_game(power_name)    
+                    #check if current token is advisor token
+                    is_advisor = server_game.has_advisor_token(power_name, token)
+                    if is_advisor:
+                        return responses.DataGame(data=client_game, request_id=request.request_id)
+                    server_game.get_power(power_name).add_advisor_token(token)
+
+                else:
+                    raise exceptions.ResponseException(f"{power_name} already has an assigned advisor")
+            else:
+                #server_game.get_power(power_name).add_advisor_token(token)
+                server_game.set_advisor(power_name, username, token)
             client_game = server_game.as_power_game(power_name)
             return responses.DataGame(data=client_game, request_id=request.request_id)
 
