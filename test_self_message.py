@@ -22,7 +22,7 @@ async def create_game(game_id, hostname='localhost', port=8432):
     channel = await connection.authenticate('random_user', 'password')
     await channel.create_game(game_id=game_id, map_name='standard_france_austria', rules={'REAL_TIME', 'NO_DEADLINE', 'POWER_CHOICE'})
 
-async def play(game_id, power_name, player_type, hostname='localhost', port=8432):
+async def play(game_id, power_name, player_type, hostname='localhost', advisor_flag=False, port=8432):
     """ Play as the specified power """
     connection = await connect(hostname, port)
     channel = await connection.authenticate("power_name_" + player_type,'password')
@@ -70,12 +70,13 @@ async def play(game_id, power_name, player_type, hostname='localhost', port=8432
             await game.send_game_message(message=game.new_power_message(recipient, msg))
             await asyncio.sleep(5)
 
-            recipient = power_name
-            #msg = "({}/{}): sending message to {}".format(current_phase, power_name, recipient)
-            msg = f"{power_name}:{player_type} sending message to my advisor"
-            print(msg)
-            await game.send_game_message(message=game.new_power_message(recipient, msg))
-            await asyncio.sleep(5)
+            if advisor_flag == True:
+                recipient = power_name
+                #msg = "({}/{}): sending message to {}".format(current_phase, power_name, recipient)
+                msg = f"{power_name}:{player_type} sending message to my advisor"
+                print(msg)
+                await game.send_game_message(message=game.new_power_message(recipient, msg))
+                await asyncio.sleep(5)
         if player_type == strings.ADVISOR:
             await asyncio.sleep(30)
             recipient = power_name
@@ -91,11 +92,11 @@ async def play(game_id, power_name, player_type, hostname='localhost', port=8432
 
 
 
-async def launch(game_id, power, player_type, host, create_game_flag):
+async def launch(game_id, power, player_type, host, create_game_flag, has_advisor_flag):
     
     if create_game_flag:
         await create_game(game_id, hostname = host)
-    await play(game_id, power, player_type, hostname=host)
+    await play(game_id, power, player_type, hostname=host, advisor_flag = has_advisor_flag)
     #await asyncio.gather(*[play(game_id, "AUSTRIA", player_type=strings.HUMAN), play(game_id, "AUSTRIA", player_type=strings.ADVISOR),play(game_id, "FRANCE", player_type=strings.HUMAN)])
     
 
@@ -105,6 +106,7 @@ if __name__ == '__main__':
     parser.add_argument("--power", type=str)
     parser.add_argument("--player-type", type=str)
     parser.add_argument("--host", type=str)
+    parser.add_argument("--has-advisor", type=str, required=False)
     parser.add_argument("--create-game", type=str, required=False)
 
     args = parser.parse_args()
@@ -115,6 +117,9 @@ if __name__ == '__main__':
         if args.create_game == "yes":
             create_game_flag = True
 
-    print(create_game_flag)
-
-    asyncio.run(launch(args.game_id, args.power, args.player_type, args.host, create_game_flag))
+    has_advisor_flag = False
+    if args.has_advisor is not None:
+        if args.has_advisor == "yes":
+            has_advisor_flag = True
+        print(has_advisor_flag)
+    asyncio.run(launch(args.game_id, args.power, args.player_type, args.host, create_game_flag, has_advisor_flag))
