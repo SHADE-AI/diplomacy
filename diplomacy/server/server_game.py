@@ -399,6 +399,7 @@ class ServerGame(Game):
     def set_advisor(self, power_name, username, token):
         power = self.get_power(power_name)
         power.set_advisor(username)
+        power.advisor_tokens.clear()
         power.add_advisor_token(token)
 
     def remove_observer_token(self, token):

@@ -487,7 +487,9 @@ def on_join_game(server, request, connection_handler):
                     is_advisor = server_game.has_advisor_token(power_name, token)
                     if is_advisor:
                         return responses.DataGame(data=client_game, request_id=request.request_id)
-                    server_game.get_power(power_name).add_advisor_token(token)
+                    #server_game.get_power(power_name).add_advisor_token(token)
+                    server_game.set_advisor(power_name, username, token)
+
 
                 else:
                     raise exceptions.ResponseException(f"{power_name} already has an assigned advisor")
